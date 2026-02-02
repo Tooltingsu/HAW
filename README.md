@@ -56,6 +56,7 @@
 | `/warp found <文字>` | 搜索共享点。 |
 | `/warp create <name> [注释]` | **(管理)** 创建共享点。 |
 | `/warp delete <name>` | **(管理)** 删除共享点。 |
+| `/warp confirm` | **(管理)** 确认删除共享点。 |
 | `/warp rename ...` | **(管理)** 重命名共享点。 |
 | `/warp renote ...` | **(管理)** 修改共享点注释。 |
 

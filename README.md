@@ -1,7 +1,7 @@
 # Home and Warp (HAW)
 
 ![Fabric](https://img.shields.io/badge/Loader-Fabric-bebebe)
-![MC Version](https://img.shields.io/badge/Minecraft-1.21%2B-green)
+![MC Version](https://img.shields.io/badge/Minecraft-1.21.5%2B-green)
 ![License](https://img.shields.io/badge/License-MIT-blue)
 
 **Home and Warp (简称 haw)** 是一个适用于 Minecraft Fabric 1.21+ 的轻量级服务端传送模组。它提供了完善的个人传送点（Home）和共享传送点（Warp）系统，支持点击交互、注释搜索、时间排序以及数量限制管理。
@@ -81,6 +81,15 @@
 *   `permissions.json`: 存储拥有额外 Warp 权限的玩家列表。
 
 *数据文件为 JSON 格式，支持在关服状态下手动编辑。*
+
+## 📝 支持的游戏版本
+| Minecraft | 是否支持 | Fabric | Fabric-api |
+| :--- | :--- | :--- | :--- |
+| 1.21以下| 否 |
+| 1.21-1.21.4 | 否 |
+| 1.21.5-1.21.10 | 是 | 0.15.3以上 | 0.128.1以上 |
+| 1.21.11以上 | 否 |
+
 
 ## 🔨 开发构建
 

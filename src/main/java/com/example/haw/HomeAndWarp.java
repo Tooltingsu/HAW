@@ -8,8 +8,11 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.suggestion.Suggestions;
+import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.minecraft.command.CommandSource;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.server.command.CommandManager;
@@ -28,6 +31,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
@@ -81,28 +85,36 @@ public class HomeAndWarp implements ModInitializer {
 						.then(argument("name", StringArgumentType.word())
 								.executes(ctx -> createHome(ctx, ""))
 								.then(argument("comment", StringArgumentType.greedyString())
+										.suggests(this::suggestHomeComments)
 										.executes(ctx -> createHome(ctx, StringArgumentType.getString(ctx, "comment"))))))
 				.then(literal("tp")
 						.then(argument("name", StringArgumentType.word())
+								.suggests(this::suggestHomeNames)
 								.executes(this::tpHome)))
 				.then(literal("delete")
 						.then(argument("name", StringArgumentType.word())
+								.suggests(this::suggestHomeNames)
 								.executes(this::requestDeleteHome)))
 				.then(literal("confirm")
 						.executes(this::confirmDeleteHome))
 				.then(literal("rename")
 						.then(argument("oldName", StringArgumentType.word())
+								.suggests(this::suggestHomeNames)
 								.then(argument("newName", StringArgumentType.word())
 										.executes(this::renameHome))))
 				.then(literal("renote")
 						.then(argument("name", StringArgumentType.word())
+								.suggests(this::suggestHomeNames)
 								.then(argument("newComment", StringArgumentType.greedyString())
+										.suggests(this::suggestHomeComments)
 										.executes(this::renoteHome))))
 				.then(literal("look")
 						.then(argument("name", StringArgumentType.word())
+								.suggests(this::suggestHomeNames)
 								.executes(this::lookHome)))
 				.then(literal("found")
 						.then(argument("text", StringArgumentType.greedyString())
+								.suggests(this::suggestHomeComments)
 								.executes(this::foundHome)))
 				.then(literal("list")
 						.executes(ctx -> listHomes(ctx, 1))
@@ -116,34 +128,92 @@ public class HomeAndWarp implements ModInitializer {
 						.then(argument("name", StringArgumentType.word())
 								.executes(ctx -> createWarp(ctx, ""))
 								.then(argument("comment", StringArgumentType.greedyString())
+										.suggests(this::suggestWarpComments)
 										.executes(ctx -> createWarp(ctx, StringArgumentType.getString(ctx, "comment"))))))
 				.then(literal("tp")
 						.then(argument("name", StringArgumentType.word())
+								.suggests(this::suggestWarpNames)
 								.executes(this::tpWarp)))
 				.then(literal("delete")
 						.then(argument("name", StringArgumentType.word())
+								.suggests(this::suggestWarpNames)
 								.executes(this::requestDeleteWarp)))
 				.then(literal("confirm")
 						.executes(this::confirmDeleteWarp))
 				.then(literal("rename")
 						.then(argument("oldName", StringArgumentType.word())
+								.suggests(this::suggestWarpNames)
 								.then(argument("newName", StringArgumentType.word())
 										.executes(this::renameWarp))))
 				.then(literal("renote")
 						.then(argument("name", StringArgumentType.word())
+								.suggests(this::suggestWarpNames)
 								.then(argument("newComment", StringArgumentType.greedyString())
+										.suggests(this::suggestWarpComments)
 										.executes(this::renoteWarp))))
 				.then(literal("look")
 						.then(argument("name", StringArgumentType.word())
+								.suggests(this::suggestWarpNames)
 								.executes(this::lookWarp)))
 				.then(literal("found")
 						.then(argument("text", StringArgumentType.greedyString())
+								.suggests(this::suggestWarpComments)
 								.executes(this::foundWarp)))
 				.then(literal("list")
 						.executes(ctx -> listWarps(ctx, 1))
 						.then(argument("page", IntegerArgumentType.integer(1))
 								.executes(ctx -> listWarps(ctx, IntegerArgumentType.getInteger(ctx, "page")))))
 		);
+	}
+
+	private CompletableFuture<Suggestions> suggestHomeNames(CommandContext<ServerCommandSource> ctx, SuggestionsBuilder builder) {
+		if (!(ctx.getSource().getEntity() instanceof ServerPlayerEntity player)) {
+			return builder.buildFuture();
+		}
+		return suggestPointNames(HawDataManager.getHomes(player.getUuid()), builder);
+	}
+
+	private CompletableFuture<Suggestions> suggestWarpNames(CommandContext<ServerCommandSource> ctx, SuggestionsBuilder builder) {
+		return suggestPointNames(HawDataManager.getWarps(), builder);
+	}
+
+	private CompletableFuture<Suggestions> suggestPointNames(Map<String, TeleportPoint> points, SuggestionsBuilder builder) {
+		List<String> names = new ArrayList<>(points.keySet());
+		names.sort(String.CASE_INSENSITIVE_ORDER);
+		return CommandSource.suggestMatching(names, builder);
+	}
+
+	private CompletableFuture<Suggestions> suggestHomeComments(CommandContext<ServerCommandSource> ctx, SuggestionsBuilder builder) {
+		if (!(ctx.getSource().getEntity() instanceof ServerPlayerEntity player)) {
+			return builder.buildFuture();
+		}
+		return suggestPointComments(HawDataManager.getHomes(player.getUuid()), builder);
+	}
+
+	private CompletableFuture<Suggestions> suggestWarpComments(CommandContext<ServerCommandSource> ctx, SuggestionsBuilder builder) {
+		return suggestPointComments(HawDataManager.getWarps(), builder);
+	}
+
+	private CompletableFuture<Suggestions> suggestPointComments(Map<String, TeleportPoint> points, SuggestionsBuilder builder) {
+		Set<String> comments = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+		for (TeleportPoint point : points.values()) {
+			if (point.comment == null) continue;
+			String comment = point.comment.trim();
+			if (comment.isEmpty()) continue;
+
+			comments.add(comment);
+			for (String part : comment.split("\\s+")) {
+				if (!part.isBlank()) comments.add(part);
+			}
+		}
+
+		String remaining = builder.getRemaining().toLowerCase(Locale.ROOT);
+		for (String comment : comments) {
+			if (remaining.isEmpty() || comment.toLowerCase(Locale.ROOT).contains(remaining)) {
+				builder.suggest(comment);
+			}
+		}
+		return builder.buildFuture();
 	}
 
 	// --- /haw Admin Logic ---

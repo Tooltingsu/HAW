@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "id": "haw",
+  "version": "${version}",
+  "name": "Home and Warp",
+  "description": "Lightweight Home and Warp commands for Fabric servers.",
+  "authors": [
+    "HAW"
+  ],
+  "contact": {},
+  "license": "MIT",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.example.haw.HomeAndWarp"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "minecraft": "${minecraft_dependency}",
+    "java": ">=${java_version}",
+    "fabric": "*"
+  }
+}

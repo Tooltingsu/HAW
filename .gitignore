@@ -1,0 +1,40 @@
+# Gradle
+.gradle/
+build/
+**/build/
+
+# Generated mod jars
+dist-jars/
+*.jar
+!gradle/wrapper/gradle-wrapper.jar
+
+# IDE/editor
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+out/
+
+# Local run and cache data
+run/
+runs/
+.tmp/
+.agents/
+.codex/
+
+# Unused root template source; active sources live in versioned folders
+/src/
+
+# Superseded compatibility source copies
+1.17-1.18.2/
+1.19-1.20.4/
+1.20.5-1.21.4/
+1.21.5-1.21.10/
+
+# OS/log files
+.DS_Store
+Thumbs.db
+*.log
+hs_err_pid*
+replay_pid*

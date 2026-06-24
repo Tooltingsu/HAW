@@ -8,3 +8,44 @@ pluginManagement {
 		gradlePluginPortal()
 	}
 }
+
+rootProject.name = 'HAW'
+
+include 'mc116'
+project(':mc116').projectDir = file('1.16-1.16.5')
+
+include 'mc117'
+project(':mc117').projectDir = file('1.17-1.17.1')
+
+include 'mc118'
+project(':mc118').projectDir = file('1.18-1.18.2')
+
+include 'mc119_1192'
+project(':mc119_1192').projectDir = file('1.19-1.19.2')
+
+include 'mc1193_1194'
+project(':mc1193_1194').projectDir = file('1.19.3-1.19.4')
+
+include 'mc120_1201'
+project(':mc120_1201').projectDir = file('1.20-1.20.1')
+
+include 'mc1202_1204'
+project(':mc1202_1204').projectDir = file('1.20.2-1.20.4')
+
+include 'mc1205_1206'
+project(':mc1205_1206').projectDir = file('1.20.5-1.20.6')
+
+include 'mc121_1211'
+project(':mc121_1211').projectDir = file('1.21-1.21.1')
+
+include 'mc1212_1214'
+project(':mc1212_1214').projectDir = file('1.21.2-1.21.4')
+
+include 'mc1215_1218'
+project(':mc1215_1218').projectDir = file('1.21.5-1.21.8')
+
+include 'mc1219_12110'
+project(':mc1219_12110').projectDir = file('1.21.9-1.21.10')
+
+include 'mc12111'
+project(':mc12111').projectDir = file('1.21.11')

@@ -1,86 +1,210 @@
 plugins {
-	id 'net.fabricmc.fabric-loom-remap' version "${loom_version}"
-	id 'maven-publish'
+	id 'net.fabricmc.fabric-loom-remap' version "${loom_version}" apply false
 }
 
-version = project.mod_version
-group = project.maven_group
+ext.hawVersions = [
+	mc116: [
+		range: '1.16-1.16.5',
+		minecraftVersion: '1.16.5',
+		minecraftDependency: '>=1.16 <=1.16.5',
+		yarnMappings: '1.16.5+build.10',
+		loaderVersion: '0.14.25',
+		fabricApiVersion: '0.42.0+1.16',
+		javaRelease: 8
+	],
+	mc117: [
+		range: '1.17-1.17.1',
+		minecraftVersion: '1.17.1',
+		minecraftDependency: '>=1.17 <=1.17.1',
+		yarnMappings: '1.17.1+build.65',
+		loaderVersion: '0.14.25',
+		fabricApiVersion: '0.46.1+1.17',
+		javaRelease: 17
+	],
+	mc118: [
+		range: '1.18-1.18.2',
+		minecraftVersion: '1.18.2',
+		minecraftDependency: '>=1.18 <=1.18.2',
+		yarnMappings: '1.18.2+build.4',
+		loaderVersion: '0.14.25',
+		fabricApiVersion: '0.77.0+1.18.2',
+		javaRelease: 17
+	],
+	mc119_1192: [
+		range: '1.19-1.19.2',
+		minecraftVersion: '1.19.2',
+		minecraftDependency: '>=1.19 <=1.19.2',
+		yarnMappings: '1.19.2+build.28',
+		loaderVersion: '0.14.25',
+		fabricApiVersion: '0.77.0+1.19.2',
+		javaRelease: 17
+	],
+	mc1193_1194: [
+		range: '1.19.3-1.19.4',
+		minecraftVersion: '1.19.4',
+		minecraftDependency: '>=1.19.3 <=1.19.4',
+		yarnMappings: '1.19.4+build.2',
+		loaderVersion: '0.14.25',
+		fabricApiVersion: '0.87.2+1.19.4',
+		javaRelease: 17
+	],
+	mc120_1201: [
+		range: '1.20-1.20.1',
+		minecraftVersion: '1.20.1',
+		minecraftDependency: '>=1.20 <=1.20.1',
+		yarnMappings: '1.20.1+build.10',
+		loaderVersion: '0.15.11',
+		fabricApiVersion: '0.92.6+1.20.1',
+		javaRelease: 17
+	],
+	mc1202_1204: [
+		range: '1.20.2-1.20.4',
+		minecraftVersion: '1.20.4',
+		minecraftDependency: '>=1.20.2 <=1.20.4',
+		yarnMappings: '1.20.4+build.3',
+		loaderVersion: '0.15.11',
+		fabricApiVersion: '0.97.3+1.20.4',
+		javaRelease: 17
+	],
+	mc1205_1206: [
+		range: '1.20.5-1.20.6',
+		minecraftVersion: '1.20.6',
+		minecraftDependency: '>=1.20.5 <=1.20.6',
+		yarnMappings: '1.20.6+build.3',
+		loaderVersion: '0.15.11',
+		fabricApiVersion: '0.100.8+1.20.6',
+		javaRelease: 21
+	],
+	mc121_1211: [
+		range: '1.21-1.21.1',
+		minecraftVersion: '1.21.1',
+		minecraftDependency: '>=1.21 <=1.21.1',
+		yarnMappings: '1.21.1+build.3',
+		loaderVersion: '0.16.14',
+		fabricApiVersion: '0.116.6+1.21.1',
+		javaRelease: 21
+	],
+	mc1212_1214: [
+		range: '1.21.2-1.21.4',
+		minecraftVersion: '1.21.4',
+		minecraftDependency: '>=1.21.2 <=1.21.4',
+		yarnMappings: '1.21.4+build.8',
+		loaderVersion: '0.16.14',
+		fabricApiVersion: '0.119.4+1.21.4',
+		javaRelease: 21
+	],
+	mc1215_1218: [
+		range: '1.21.5-1.21.8',
+		minecraftVersion: '1.21.5',
+		minecraftDependency: '>=1.21.5 <=1.21.8',
+		yarnMappings: '1.21.5+build.1',
+		loaderVersion: '0.16.14',
+		fabricApiVersion: '0.128.1+1.21.5',
+		javaRelease: 21
+	],
+	mc1219_12110: [
+		range: '1.21.9-1.21.10',
+		minecraftVersion: '1.21.10',
+		minecraftDependency: '>=1.21.9 <=1.21.10',
+		yarnMappings: '1.21.10+build.2',
+		loaderVersion: '0.16.14',
+		fabricApiVersion: '0.138.4+1.21.10',
+		javaRelease: 21
+	],
+	mc12111: [
+		range: '1.21.11',
+		minecraftVersion: '1.21.11',
+		minecraftDependency: '1.21.11',
+		yarnMappings: '1.21.11+build.6',
+		loaderVersion: '0.19.3',
+		fabricApiVersion: '0.141.4+1.21.11',
+		javaRelease: 21
+	]
+]
 
-base {
-	archivesName = project.archives_base_name
-}
-
-repositories {
-	// Add repositories to retrieve artifacts from in here.
-	// You should only use this when depending on other mods because
-	// Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
-	// See https://docs.gradle.org/current/userguide/declaring_repositories.html
-	// for more information about repositories.
-}
-
-loom {
-	splitEnvironmentSourceSets()
-
-	mods {
-		"haw" {
-			sourceSet sourceSets.main
-			sourceSet sourceSets.client
-		}
+subprojects {
+	def cfg = rootProject.ext.hawVersions[project.name]
+	if (cfg == null) {
+		throw new GradleException("Missing HAW version config for ${project.name}")
 	}
 
-}
+	apply plugin: 'net.fabricmc.fabric-loom-remap'
+	apply plugin: 'maven-publish'
 
-dependencies {
-	minecraft "com.mojang:minecraft:1.21.8" // 请修改为你需要的具体版本
-	mappings "net.fabricmc:yarn:1.21.8+build.1:v2"
-	modImplementation "net.fabricmc:fabric-loader:0.18.4"
-	modImplementation "net.fabricmc.fabric-api:fabric-api:0.136.1+1.21.8"
-}
+	version = "${rootProject.mod_version}-${cfg.range}-fabric"
+	group = rootProject.maven_group
 
-processResources {
-	inputs.property "version", project.version
-
-	filesMatching("fabric.mod.json") {
-		expand "version": inputs.properties.version
-	}
-}
-
-tasks.withType(JavaCompile).configureEach {
-	it.options.release = 21
-}
-
-java {
-	// Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
-	// if it is present.
-	// If you remove this line, sources will not be generated.
-	withSourcesJar()
-
-	sourceCompatibility = JavaVersion.VERSION_21
-	targetCompatibility = JavaVersion.VERSION_21
-}
-
-jar {
-	inputs.property "archivesName", project.base.archivesName
-
-	from("LICENSE") {
-		rename { "${it}_${inputs.properties.archivesName}"}
-	}
-}
-
-// configure the maven publication
-publishing {
-	publications {
-		create("mavenJava", MavenPublication) {
-			artifactId = project.archives_base_name
-			from components.java
-		}
+	base {
+		archivesName = rootProject.archives_base_name
 	}
 
-	// See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
 	repositories {
-		// Add repositories to publish to here.
-		// Notice: This block does NOT have the same function as the block in the top level.
-		// The repositories here will be used for publishing your artifact, not for
-		// retrieving dependencies.
+		mavenCentral()
 	}
+
+	loom {
+		mods {
+			"haw" {
+				sourceSet sourceSets.main
+			}
+		}
+	}
+
+	dependencies {
+		minecraft "com.mojang:minecraft:${cfg.minecraftVersion}"
+		mappings "net.fabricmc:yarn:${cfg.yarnMappings}:v2"
+		modImplementation "net.fabricmc:fabric-loader:${cfg.loaderVersion}"
+		modImplementation "net.fabricmc.fabric-api:fabric-api:${cfg.fabricApiVersion}"
+	}
+
+	processResources {
+		inputs.property "version", rootProject.mod_version
+		inputs.property "loader_version", cfg.loaderVersion
+		inputs.property "minecraft_dependency", cfg.minecraftDependency
+		inputs.property "java_version", cfg.javaRelease
+
+		filesMatching("fabric.mod.json") {
+			expand inputs.properties
+		}
+	}
+
+	tasks.withType(JavaCompile).configureEach {
+		options.encoding = 'UTF-8'
+		options.release = cfg.javaRelease
+	}
+
+	java {
+		withSourcesJar()
+		sourceCompatibility = JavaVersion.toVersion(cfg.javaRelease)
+		targetCompatibility = JavaVersion.toVersion(cfg.javaRelease)
+	}
+
+	jar {
+		inputs.property "archivesName", project.base.archivesName
+
+		from(rootProject.file("LICENSE")) {
+			rename { "${it}_${inputs.properties.archivesName}" }
+		}
+	}
+
+	publishing {
+		publications {
+			create("mavenJava", MavenPublication) {
+				artifactId = "${rootProject.archives_base_name}-${cfg.range}-fabric"
+				from components.java
+			}
+		}
+	}
+}
+
+tasks.register("build") {
+	group = "build"
+	description = "Builds all HAW Fabric compatibility jars."
+	dependsOn subprojects.collect { it.tasks.named("build") }
+}
+
+tasks.register("buildAll") {
+	group = "build"
+	description = "Alias for build."
+	dependsOn tasks.named("build")
 }
